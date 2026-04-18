@@ -7,6 +7,12 @@ import { useScript } from './useScript'
  */
 export interface HubSpotChatConfig {
   /**
+   * Whether the integration is allowed to load at all.
+   * Useful for consent-gating third-party chat widgets.
+   * @default true
+   */
+  enabled?: boolean
+  /**
    * Array of path patterns where HubSpot should load.
    * Can be exact paths or path prefixes (e.g., '/paid-support' or '/workshops')
    * @default ['/paid-support', '/workshops']
@@ -25,6 +31,7 @@ export interface HubSpotChatConfig {
 }
 
 const defaultConfig = {
+  enabled: true,
   enabledPaths: ['/paid-support', '/workshops'],
   scriptSrc: '//js-na1.hs-scripts.com/45982155.js',
   scriptId: 'hs-script-loader',
@@ -36,12 +43,16 @@ const defaultConfig = {
  */
 export function useHubSpotChat(config?: HubSpotChatConfig) {
   const location = useLocation()
-  const { enabledPaths, scriptSrc, scriptId } = {
+  const { enabled, enabledPaths, scriptSrc, scriptId } = {
     ...defaultConfig,
     ...config,
   }
 
   const shouldLoad = React.useMemo(() => {
+    if (!enabled) {
+      return false
+    }
+
     return enabledPaths.some((path) => {
       // Exact match
       if (location.pathname === path) {
@@ -53,7 +64,20 @@ export function useHubSpotChat(config?: HubSpotChatConfig) {
       }
       return false
     })
-  }, [location.pathname, enabledPaths])
+  }, [enabled, location.pathname, enabledPaths])
+
+  React.useEffect(() => {
+    if (shouldLoad) {
+      return
+    }
+
+    document.getElementById(scriptId)?.remove()
+    document
+      .querySelectorAll(
+        '#hubspot-messages-iframe-container, [id^="hubspot-"], [class*="hubspot"]',
+      )
+      .forEach((node) => node.remove())
+  }, [scriptId, shouldLoad])
 
   // Only load the script if we should load the chat widget
   useScript(
@@ -64,11 +88,6 @@ export function useHubSpotChat(config?: HubSpotChatConfig) {
           defer: true,
           src: scriptSrc,
         }
-      : {
-          id: scriptId,
-          async: true,
-          defer: true,
-          src: '', // Empty src prevents loading
-        },
+      : null,
   )
 }

@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 export function useScript(
-  attrs: React.HTMLProps<HTMLScriptElement>,
+  attrs: React.HTMLProps<HTMLScriptElement> | null,
   opts?: {
     delay?: number
   },
@@ -9,6 +9,10 @@ export function useScript(
   const attrsStringified = JSON.stringify(attrs)
 
   React.useEffect(() => {
+    if (!attrs?.src) {
+      return
+    }
+
     const addScript = () => {
       const script = document.createElement('script')
       Object.assign(script, attrs)

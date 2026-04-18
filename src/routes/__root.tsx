@@ -25,6 +25,7 @@ const LazyAppDevtools = import.meta.env.DEV
   : null
 import { NotFound } from '~/components/NotFound'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
+import { ConsentManagerShell } from '~/components/ConsentManager'
 import { SearchProvider, useSearchContext } from '~/contexts/SearchContext'
 import { ToastProvider } from '~/components/ToastProvider'
 import { LoginModalProvider } from '~/contexts/LoginModalContext'
@@ -36,13 +37,8 @@ import { Spinner } from '~/components/Spinner'
 import { ThemeProvider, useHtmlClass } from '~/components/ThemeProvider'
 import { Navbar } from '~/components/Navbar'
 import { THEME_COLORS } from '~/utils/utils'
-import { useHubSpotChat } from '~/hooks/useHubSpotChat'
 import { trackPageView } from '~/utils/analytics'
 import { twMerge } from 'tailwind-merge'
-
-const GOOGLE_ANALYTICS_ID = 'G-JMT1Z50SPS'
-const GOOGLE_ANALYTICS_SCRIPT_SRC = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`
-const GOOGLE_ANALYTICS_BOOTSTRAP = `(function(){var id='${GOOGLE_ANALYTICS_ID}';var src='${GOOGLE_ANALYTICS_SCRIPT_SRC}';window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};window.gtag('js',new Date());window.gtag('config',id);var loaded=false;var load=function(){if(loaded)return;loaded=true;var script=document.createElement('script');script.async=true;script.src=src;script.setAttribute('data-ga-loader','true');document.head.appendChild(script)};if(typeof window.requestIdleCallback==='function'){window.requestIdleCallback(load,{timeout:3000});return}if(document.readyState==='complete'){window.setTimeout(load,1500);return}window.addEventListener('load',function(){window.setTimeout(load,1500)},{once:true})})();`
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -109,9 +105,6 @@ export const Route = createRootRouteWithContext<{
       {
         children: `(function(){try{var t=localStorage.getItem('theme')||'auto';var v=['light','dark','auto'].includes(t)?t:'auto';if(v==='auto'){var a=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.classList.add(a,'auto')}else{document.documentElement.classList.add(v)}}catch(e){var a=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.classList.add(a,'auto')}})()`,
       },
-      {
-        children: GOOGLE_ANALYTICS_BOOTSTRAP,
-      },
     ],
   }),
   beforeLoad: async (ctx) => {
@@ -147,9 +140,6 @@ function ShellComponent({ children }: { children: React.ReactNode }) {
   const hasBaseParent = useMatches({
     select: (matches) => matches.find((d) => d.staticData?.baseParent),
   })
-
-  // HubSpot chat loads on configured pages (see useHubSpotChat hook)
-  useHubSpotChat()
 
   const isNavigating = useRouterState({
     select: (s) => s.isLoading || s.isTransitioning,
@@ -214,43 +204,45 @@ function ShellComponent({ children }: { children: React.ReactNode }) {
         {hasBaseParent ? <base target="_parent" /> : null}
       </head>
       <body className="overflow-x-hidden">
-        <LoginModalProvider>
-          <ToastProvider>
-            <PageViewTracker />
-            {hideNavbar ? children : <Navbar>{children}</Navbar>}
-            {showDevtools && LazyAppDevtools ? (
-              <React.Suspense fallback={null}>
-                <LazyAppDevtools />
-              </React.Suspense>
-            ) : null}
-            <div
-              aria-hidden="true"
-              className={twMerge(
-                'pointer-events-none fixed top-0 left-0 z-99999999 h-[320px] w-full select-none',
-              )}
-            >
+        <ConsentManagerShell>
+          <LoginModalProvider>
+            <ToastProvider>
+              <PageViewTracker />
+              {hideNavbar ? children : <Navbar>{children}</Navbar>}
+              {showDevtools && LazyAppDevtools ? (
+                <React.Suspense fallback={null}>
+                  <LazyAppDevtools />
+                </React.Suspense>
+              ) : null}
               <div
+                aria-hidden="true"
                 className={twMerge(
-                  'absolute top-0 w-full h-80 rounded-[100%] bg-amber-500/30 blur-3xl transition-all duration-500 dark:bg-sky-400/25',
-                  showNavigationSpinner
-                    ? '-translate-y-1/2 opacity-100'
-                    : '-translate-y-full opacity-0',
-                )}
-              />
-              <div
-                className={twMerge(
-                  'absolute top-6 left-1/2 -translate-x-1/2 rounded-full bg-white/75 p-2 shadow-lg backdrop-blur-lg transition-all duration-300 dark:bg-slate-900/40',
-                  showNavigationSpinner
-                    ? 'translate-y-0 opacity-100'
-                    : '-translate-y-6 opacity-0',
+                  'pointer-events-none fixed top-0 left-0 z-99999999 h-[320px] w-full select-none',
                 )}
               >
-                <Spinner className="text-4xl" />
+                <div
+                  className={twMerge(
+                    'absolute top-0 w-full h-80 rounded-[100%] bg-amber-500/30 blur-3xl transition-all duration-500 dark:bg-sky-400/25',
+                    showNavigationSpinner
+                      ? '-translate-y-1/2 opacity-100'
+                      : '-translate-y-full opacity-0',
+                  )}
+                />
+                <div
+                  className={twMerge(
+                    'absolute top-6 left-1/2 -translate-x-1/2 rounded-full bg-white/75 p-2 shadow-lg backdrop-blur-lg transition-all duration-300 dark:bg-slate-900/40',
+                    showNavigationSpinner
+                      ? 'translate-y-0 opacity-100'
+                      : '-translate-y-6 opacity-0',
+                  )}
+                >
+                  <Spinner className="text-4xl" />
+                </div>
               </div>
-            </div>
-            <SearchHotkeyController />
-          </ToastProvider>
-        </LoginModalProvider>
+              <SearchHotkeyController />
+            </ToastProvider>
+          </LoginModalProvider>
+        </ConsentManagerShell>
         <Scripts />
       </body>
     </html>

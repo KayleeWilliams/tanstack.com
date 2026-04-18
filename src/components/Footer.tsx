@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { ConsentPreferencesLink } from './ConsentManager'
 import { Card } from './Card'
 
 const footerLinks = [
@@ -53,6 +54,9 @@ export function Footer() {
             )}
           </div>
         ))}
+        <div>
+          <ConsentPreferencesLink />
+        </div>
       </div>
       <div className={`text-center opacity-60`}>
         &copy; {new Date().getFullYear()} TanStack LLC
