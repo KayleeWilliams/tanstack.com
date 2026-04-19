@@ -5,12 +5,8 @@ import {
   ConsentDialogLink,
   ConsentManagerProvider,
   type Theme,
-  useConsentManager,
 } from '@c15t/react'
 import { gtag } from '@c15t/scripts/google-tag'
-import { useHubSpotChat } from '~/hooks/useHubSpotChat'
-
-const GOOGLE_ANALYTICS_ID = 'G-JMT1Z50SPS'
 
 const theme = {
   colors: {
@@ -133,12 +129,20 @@ export function ConsentManagerShell({
     <ConsentManagerProvider
       options={{
         mode: 'offline',
-        consentCategories: ['necessary', 'marketing'],
+        consentCategories: ['necessary', 'measurement'],
         scripts: [
           gtag({
-            id: GOOGLE_ANALYTICS_ID,
-            category: 'marketing',
+            id: 'G-JMT1Z50SPS',
+            category: 'measurement',
           }),
+          {
+            id: 'hs-script-loader',
+            src: 'https://js.hs-scripts.com/45982155.js',
+            category: 'measurement',
+            async: true,
+            defer: true,
+            target: 'body',
+          },
         ],
         legalLinks: {
           privacyPolicy: { href: '/privacy', target: '_self' },
@@ -147,17 +151,13 @@ export function ConsentManagerShell({
         theme,
       }}
     >
-      <ConsentAwareIntegrations />
       {children}
       <ConsentBanner
         legalLinks={['privacyPolicy', 'termsOfService']}
         layout={[['accept', 'reject'], 'customize']}
         primaryButton="customize"
       />
-      <ConsentDialog
-        hideBranding={false}
-        legalLinks={['privacyPolicy', 'termsOfService']}
-      />
+      <ConsentDialog legalLinks={['privacyPolicy', 'termsOfService']} />
     </ConsentManagerProvider>
   )
 }
@@ -176,13 +176,4 @@ export function ConsentPreferencesLink({
       {children}
     </ConsentDialogLink>
   )
-}
-
-function ConsentAwareIntegrations() {
-  const { has } = useConsentManager()
-  const hasMarketingConsent = has('marketing')
-
-  useHubSpotChat({ enabled: hasMarketingConsent })
-
-  return null
 }
