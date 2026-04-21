@@ -19,7 +19,7 @@ const headerLinkStyles =
 const consentTitle = 'font-semibold tracking-[-0.02em] text-gray-950 dark:text-gray-50'
 const consentCopy = 'text-[13px] leading-5'
 const brandTagBase =
-  'border border-cyan-500/25 bg-white px-3 py-1 text-[10px] font-medium tracking-[0.16em] text-cyan-700 shadow-none dark:border-cyan-400/25 dark:bg-gray-900 dark:text-cyan-300'
+  'border border-cyan-500/25 bg-white px-3 py-1 text-[10px] font-medium tracking-[0.16em] !text-cyan-700 shadow-none [&_*]:!text-cyan-700 dark:border-cyan-400/25 dark:bg-gray-900 dark:!text-cyan-300 dark:[&_*]:!text-cyan-300'
 const buttonBase =
   'inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
 const buttonPrimaryFocus =
@@ -120,7 +120,10 @@ const theme = {
     consentDialogDescription: cx('max-w-[56ch]', consentCopy),
     consentDialogContent:
       'data-[testid=consent-dialog-content]:px-5 data-[testid=consent-dialog-content]:py-4',
-    consentDialogTag: cx('rounded-t-none rounded-b-lg border-t-0', brandTagBase),
+    consentDialogTag: cx(
+      '!relative !right-auto !bottom-auto !translate-y-0 self-end rounded-t-none rounded-b-lg border-t-0',
+      brandTagBase,
+    ),
     consentWidget:
       'gap-4 [&_[data-testid=consent-widget-footer]]:mt-1 [&_[data-testid=consent-widget-footer]]:pt-4',
     consentWidgetAccordion: 'gap-3',
