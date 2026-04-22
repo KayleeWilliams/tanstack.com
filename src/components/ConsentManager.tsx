@@ -109,8 +109,13 @@ const theme = {
       'rounded-t-lg rounded-b-none border-b-gray-200 dark:border-b-gray-800',
       brandTagBase,
     ),
-    consentDialog:
-      'px-3 py-6 sm:px-6 sm:py-10 backdrop-blur-[3px] supports-[backdrop-filter]:bg-transparent',
+    consentDialog: {
+      className:
+        'px-3 py-6 sm:px-6 sm:py-10 backdrop-blur-[3px] supports-[backdrop-filter]:bg-transparent',
+      style: {
+        '--consent-dialog-max-width': '24rem',
+      },
+    },
     consentDialogCard: cx('overflow-visible rounded-lg shadow-2xl', surfaceCard),
     consentDialogHeader: cx(
       'gap-2 rounded-t-lg border-b border-gray-200 bg-gray-50/80 px-5 py-4 text-gray-600 dark:border-gray-800 dark:bg-gray-950/70 dark:text-gray-400',
